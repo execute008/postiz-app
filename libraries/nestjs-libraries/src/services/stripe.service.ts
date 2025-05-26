@@ -75,7 +75,11 @@ export class StripeService {
         return current;
       }
       return prev;
-    });
+    }, {created: -100} as Stripe.PaymentMethod);
+
+    if (!latestMethod.id) {
+      return false;
+    }
 
     try {
       const paymentIntent = await stripe.paymentIntents.create({
@@ -348,15 +352,7 @@ export class StripeService {
   async createBillingPortalLink(customer: string) {
     return stripe.billingPortal.sessions.create({
       customer,
-      flow_data: {
-        after_completion: {
-          type: 'redirect',
-          redirect: {
-            return_url: process.env['FRONTEND_URL'] + '/billing',
-          },
-        },
-        type: 'payment_method_update',
-      },
+      return_url: process.env['FRONTEND_URL'] + '/billing',
     });
   }
 
